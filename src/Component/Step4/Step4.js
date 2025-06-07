@@ -5,23 +5,30 @@ import AgentCreationLoader from '../Popup/AgentCreationLoader';
 const roles = [
     {
         title: 'General Receptionist',
-        description: 'Always ready to assist',
+        description: 'Ready to handle all Inbound calls',
         icon: 'svg/general-receptionist.svg',
     },
     {
-        title: 'Sales Receptionist',
-        description: 'Boosting your sales calls.',
+        title: 'Inbound LEAD Qualifier',
+        description: 'Handle inbound sales queries',
         icon: 'svg/sales receptionist.svg',
     },
-    {
-        title: 'Technical Receptionist',
-        description: 'Smart support at entry.',
-        icon: 'svg/technical-receptionist.svg',
-    },
+    // {
+    //     title: 'Technical Support Agent',
+    //     description: 'Product/Service Tech support',
+    //     icon: 'svg/technical-receptionist.svg',
+    // },
 ];
 const Step4 = forwardRef(({ onNext, onBack, onValidationError, loading, setLoading }, ref) => {
     const [selectedRole, setSelectedRole] = useState('');
+    useEffect(()=>{
+        const updationMode = localStorage.getItem("UpdationMode") === "ON";
+        const storedAgentRole = localStorage.getItem('agentRole');
 
+            if(updationMode){
+                setSelectedRole(storedAgentRole)
+            }
+    },[])
 
     useEffect(() => {
         sessionStorage.setItem('agentRole', selectedRole)

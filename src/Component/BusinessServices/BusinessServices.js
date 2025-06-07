@@ -1,17 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import styles from '../BusinessServices/BusinessServices.module.css';
 import { useNavigate } from "react-router-dom";
-
+import { validateEmail as validateEmailAPI } from '../../Store/apiStore';
+import PopUp from '../Popup/Popup';
 const BusinessServices = () => {
     const navigate = useNavigate();
     const [businessType, setBusinessType] = useState("Restaurant");
-    const [selectedService, setSelectedService] = useState("");
+    const [selectedService, setSelectedService] = useState([]);
     const [businessName, setBusinessName] = useState("");
     const [businessSize, setBusinessSize] = useState("");
     const [email, setEmail] = useState("");
     // Error states
-    const [emailError, setEmailError] = useState("");
+   const [emailError, setEmailError] = useState("");
     const [serviceError, setServiceError] = useState("");
+    const [isEmailVerified, setIsEmailVerified] = useState(false);
+    const [popupMessage, setPopupMessage] = useState(""); 
+    const [popupType, setPopupType] = useState("");
+    // const [selectedServices, setSelectedServices] = useState([]);
+
     const businessServices = [
         {
             type: "Restaurant",
@@ -267,6 +273,7 @@ const BusinessServices = () => {
             ]
         }
     ];
+    
     const [searchTerm, setSearchTerm] = useState("");
     const selectedBusiness = businessServices.find(biz => biz.type === businessType);
     const selectedServices = selectedBusiness?.services || [];
@@ -296,38 +303,117 @@ const BusinessServices = () => {
         setServiceError("");
         return true;
     };
+const handleContinue = () => {
+  const isEmailValid = validateEmail(email);
+  const isServiceValid = selectedService.length > 0;
 
-    const handleContinue = () => {
-        const isEmailValid = validateEmail(email);
-        const isServiceValid = validateService(selectedService);
+  if (isEmailValid && isServiceValid) {
+    // Save selected services in sessionStorage
+    sessionStorage.setItem("businessDetails", JSON.stringify({
+      businessType,
+      businessName,
+      businessSize,
+      selectedService, 
+      email,
+    }));
 
-        if (isEmailValid && isServiceValid) {
-            sessionStorage.setItem(
-                "businessDetails",
-                JSON.stringify({
-                    businessType,
-                    businessName,
-                    businessSize,
-                    selectedService,
-                    email,
-                })
-            );
-            navigate("/business-locations");
+    // Save selected services as selectedServices
+    sessionStorage.setItem("selectedServices", JSON.stringify(selectedService));
+
+    navigate("/about-business-next");
+  } else {
+    const errorMessage = isEmailValid
+      ? "Please select at least one service."
+      : "Invalid email address or empty fields."; 
+
+    setPopupMessage(errorMessage);
+    setPopupType("failed");
+  }
+};
+
+
+
+
+      const handleEmailVerify = async () => {
+        try {
+            const response = await validateEmailAPI(email);
+
+            if (response.valid) {
+                setIsEmailVerified(true);  
+                setEmailError(""); 
+                setPopupMessage("Email verified successfully!");
+                setPopupType("success");  
+            } else {
+                setIsEmailVerified(false);
+                setPopupMessage("Invalid email address.");
+                setPopupType("failed");  
+                setEmailError("Invalid email address.");
+            }
+        } catch (error) {
+            console.error("Error verifying email:", error);
+            setEmailError("Error verifying email.");
+            setPopupMessage("Error verifying email.");
+            setPopupType("failed"); 
+            setIsEmailVerified(false);
         }
     };
-    useEffect(() => {
-        const savedDetails = JSON.parse(sessionStorage.getItem("businessDetails"));
-        if (savedDetails) {
-            setBusinessType(savedDetails.businessType);
-            setBusinessName(savedDetails.businessName);
-            setBusinessSize(savedDetails.businessSize);
-            setSelectedService(savedDetails.selectedService || "");
-            setEmail(savedDetails.email || "");
-        }
-    }, []);
+
+useEffect(() => {
+  try {
+    const isUpdateMode = localStorage.getItem("UpdationMode") === "ON";
+
+    const rawBusinessDetails = sessionStorage.getItem("businessDetails");
+    const rawBusinessServices = sessionStorage.getItem("businesServices");
+
+    const businessDetails =
+      rawBusinessDetails && rawBusinessDetails !== "null" && rawBusinessDetails !== "undefined"
+        ? JSON.parse(rawBusinessDetails)
+        : null;
+
+    const businessServices =
+      rawBusinessServices && rawBusinessServices !== "null" && rawBusinessServices !== "undefined"
+        ? JSON.parse(rawBusinessServices)
+        : null;
+
+    if (!isUpdateMode) {
+      if (businessDetails) {
+        setBusinessType(businessDetails.businessType || "");
+        setBusinessName(businessDetails.businessName || "");
+        setBusinessSize(businessDetails.businessSize || "");
+        setSelectedService(businessDetails.selectedService || []);
+        setEmail(businessDetails.email || "");
+      }
+    } else {
+      if (businessDetails) {
+        setBusinessType(businessDetails.businessType || "");
+        setBusinessName(businessDetails.businessName || "");
+        setBusinessSize(businessDetails.businessSize || "");
+      }
+
+      if (businessServices) {
+        setSelectedService(businessServices.selectedService || []);
+        setEmail(businessServices.email || "");
+      }
+    }
+  } catch (error) {
+    console.error("Error loading session data:", error);
+  }
+}, []);
+
+
+  const handleServiceToggle = (service) => {
+    setSelectedService((prev) =>
+      prev.includes(service)
+        ? prev.filter((s) => s !== service)
+        : [...prev, service]
+    );
+    setServiceError("");
+  };
+
+    
 
     return (
-        <div className={styles.container}>
+         <div className={styles.container}>
             <h1 className={styles.title}>Business Services</h1>
 
             <div className={styles.searchBox}>
@@ -342,7 +428,7 @@ const BusinessServices = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </div>
-
+  <div className={styles.ListDiv}>
             <div className={styles.optionList}>
                 {filteredServices.length > 0 ? (
                     filteredServices.map((service, index) => (
@@ -360,17 +446,14 @@ const BusinessServices = () => {
                                     <p className={styles.subType}>{selectedBusiness.subtype}</p>
                                 </div>
                             </div>
+                            
                             <div>
                                 <input
-                                    type="radio"
+                                    type="checkbox"
                                     name="service"
                                     value={service}
-                                    checked={selectedService === service}
-                                    onChange={(e) => {
-                                        setSelectedService(e.target.value);
-                                        setServiceError(""); // Clear error on change
-                                    }}
-                                    onBlur={(e) => validateService(e.target.value)}
+                                    checked={selectedService.includes(service)}
+                                    onChange={() => handleServiceToggle(service)}
                                 />
                             </div>
                         </label>
@@ -383,6 +466,8 @@ const BusinessServices = () => {
                 )}
             </div>
 
+</div>
+
             <div className={styles.labReq}>
                 <div className={styles.inputGroup}>
                     <div className={styles.Dblock}>
@@ -393,12 +478,28 @@ const BusinessServices = () => {
                             value={email}
                             onChange={(e) => {
                                 setEmail(e.target.value);
-                                setEmailError(""); // Clear error on change
+                                setEmailError("");
+                                // setIsEmailVerified(false); 
                             }}
-                            onBlur={(e) => validateEmail(e.target.value)}
+                            // onBlur={(e) => validateEmail(e.target.value)}
                         />
                         {emailError && (
                             <p style={{ color: 'red', marginTop: '5px' }}>{emailError}</p>
+                        )}
+
+                        {/* {!isEmailVerified && (
+                            <button
+                                type="button"
+                                className={styles.verifyButton}
+                                onClick={handleEmailVerify}
+                                disabled={emailError || isEmailVerified}
+                            >
+                                Verify Email
+                            </button>
+                        )} */}
+
+                        {isEmailVerified && (
+                            <p style={{ color: 'green', marginTop: '5px' }}>Email verified successfully!</p>
                         )}
                     </div>
                 </div>
@@ -406,11 +507,23 @@ const BusinessServices = () => {
 
             <div>
                 <div type="submit">
-                    <div className={styles.btnTheme} onClick={handleContinue}>
-
+                    <div
+                        className={styles.btnTheme}
+                        onClick={handleContinue}
+                        // disabled={!isEmailVerified} 
+                    >
                         <img src="svg/svg-theme.svg" alt="" type="button" />
                         <p>Continue</p>
-                    </div> </div> </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Show PopUp */}
+            <PopUp
+                type={popupType}
+                message={popupMessage}
+                onClose={() => setPopupMessage("")}  // Close the popup
+            />
         </div>
     );
 };

@@ -23,11 +23,11 @@ const Modal2 = ({ isOpen, onClose, children }) => {
 
   useEffect(() => {
     const escHandler = (e) => {
-      if (e.key === 'Escape') handleClose();
+      if (e.key === 'Escape') onClose();  
     };
     document.addEventListener('keydown', escHandler);
     return () => document.removeEventListener('keydown', escHandler);
-  }, []);
+  }, [onClose]);
 
   const handleClose = () => {
     setIsClosing(true);
@@ -35,27 +35,26 @@ const Modal2 = ({ isOpen, onClose, children }) => {
       setShouldRender(false);
       document.body.style.overflow = 'auto';
       setIsClosing(false);
-      onClose();
+      onClose();  
     }, 300);
   };
 
   if (!shouldRender) return null;
 
   return (
-    <div className={styles.backdrop} onClick={handleClose}>
-    <div
-      className={`${styles.modalContainer} ${isClosing ? styles.slideDown : ''}`}
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div className={styles.modal}>
-        <button className={styles.closeBtn} onClick={handleClose}>
-          <img src='images/cross-icon.png' alt='cross-icon' />
-        </button>
-        {children}
+    <div className={styles.backdrop} >
+      <div
+        className={`${styles.modalContainer} ${isClosing ? styles.slideDown : ''}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className={styles.modal}>
+          <button className={styles.closeBtn} onClick={handleClose}>
+            <img src='images/cross-icon.png' alt='cross-icon' />
+          </button>
+          {children}
+        </div>
       </div>
-      {/* <div className={styles.notch}></div> */} {/* Remove or comment this out */}
     </div>
-  </div>
   );
 };
 

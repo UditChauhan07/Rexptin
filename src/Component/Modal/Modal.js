@@ -11,8 +11,6 @@ const Modal = ({ isOpen, onClose, children }) => {
       document.body.style.overflow = 'hidden';
     } else if (shouldRender) {
       setIsClosing(true);
-      document.body.style.overflow = 'auto';
-
       const timer = setTimeout(() => {
         setShouldRender(false);
         setIsClosing(false);
@@ -32,6 +30,7 @@ const Modal = ({ isOpen, onClose, children }) => {
 
   const handleClose = () => {
     setIsClosing(true);
+    document.body.style.overflow = 'auto';
     setTimeout(() => {
       setShouldRender(false);
       setIsClosing(false);
@@ -42,7 +41,7 @@ const Modal = ({ isOpen, onClose, children }) => {
   if (!shouldRender) return null;
 
   return (
-    <div className={styles.backdrop} onClick={handleClose}>
+    <div className={styles.backdrop} >
       <div
         className={`${styles.modalContainer} ${isClosing ? styles.slideDown : ''}`}
         onClick={(e) => e.stopPropagation()}

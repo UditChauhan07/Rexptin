@@ -265,6 +265,31 @@
 }
 
 
+.LangStyle.ScalerPlan {
+    background-color: #FFECE5;
+}
+.LangStyle.StarterPlan {
+    background-color: #cbe7f7;
+}
+
+.LangStyle.GrowthPlan {
+    background-color: #F4DFE1;
+}
+
+
+.LangStyle.StarterPlan .PlanPrice {
+    background-color: #A3DEFF;
+}
+
+.LangStyle.ScalerPlan .PlanPrice {
+    background-color: #FFD2C1;
+}
+
+.LangStyle.GrowthPlan .PlanPrice {
+    background-color: #FFBEC4;
+}
+
+
 
 
 
@@ -356,7 +381,7 @@
 }
 
 .LangStyle .PlanPrice {
-    padding: 2px 20px;
+    padding: 2px 10px;
     width: 115px;
     height: 22px;
     font-size: 12px;
@@ -424,6 +449,45 @@
 .AssignNumText .NumberCaller {
     font-size: 1.2rem;
     font-weight: 600;
+}
+
+@media screen and (min-width: 601px) {
+    .main .LangStyle:last-child {
+    margin-bottom: 0rem;
+}
+ .forSticky{
+    width: 50%;
+    /* margin: auto; */
+    position: unset;
+    left: 0;
+    right: 0;
+    transform: translate(50%,0%);
+
+}
+
+.main {
+    padding: 0 20px;
+       /* grid-template-columns: repeat(3, auto); */
+    /* grid-template-columns: repeat(3, minmax(200px, 1fr)); */
+    flex-wrap: wrap; 
+    flex-wrap: wrap;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 7rem;
+
+}
+
+.LangStyle {
+    width: 30%;
+    padding: 20px;
+    border-radius: 18px;
+    margin: 0 0px;
+    cursor: pointer;
+     min-width: 400px;
+ margin-bottom: unset; 
+}
+
+
 }
 
 @media (max-width:380px) {
