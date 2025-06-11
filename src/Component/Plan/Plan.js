@@ -190,14 +190,14 @@ const Plan = ({ agentID, locationPath }) => {
         ))}
       </div>
 
-      {/* Continue button */}
+      {/* Continue button  cudo*/}
       <div
         className={styles.bottomBtn}>
         <div
           className={styles.btnTheme}
           onClick={() => {
             if (selected) {
-              navigate('/checkout', { state: { priceId: selected, agentId: agentID, locationPath1: "/dsbd" } });
+              navigate('/checkout', { state: { priceId: selected, agentId: agentID } });
             } else {
               alert('Please select a plan first');
             }
