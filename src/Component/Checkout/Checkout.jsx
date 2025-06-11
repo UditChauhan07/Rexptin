@@ -220,7 +220,7 @@ const [disabled, setDisabled] = useState(true);
 
             if (verifyData.success) {
               // Show the countdown popup
-              if (locationPath === "/dashboard") {
+              if (locationPath === "/dashboard" ) {
                 setShowCountdownPopup(true);
               } else {
                 setMessage("Subscription successful!");

@@ -23,10 +23,9 @@ export default function SubscriptionFlow() {
   const [loading, setLoading] = useState(false);
 const [userVerified , setUserVerified] = useState(false)
   const [customerId, setCustomerId] = useState('');
-  const [userId, setUserId] = useState('');
-
+const [userId , setUserId] = useState()
   const [subscriptionSuccess, setSubscriptionSuccess] = useState(false);
-console.log({otpVerified})
+
   // Auto redirect after payment success
   useEffect(() => {
     if (subscriptionSuccess) navigate('/business-details');
@@ -35,11 +34,13 @@ let token = localStorage.getItem("token")
 const [userDetails , setUserDetails] = useState()
 useEffect(()=>{
  const result =  decodeToken(token)
+ 
  setUserDetails(result)
- console.log({result})
+setUserId(result.id)
+
 } , [])
 
-console.log(locationPath !== "/dashboard" && locationPath!=="/dsbd" , "randi ka bacha asss")
+
   // Check subscription after OTP verified and customerId available
   useEffect(() => {
     if (!otpVerified || !customerId) return;
@@ -83,12 +84,14 @@ console.log(locationPath !== "/dashboard" && locationPath!=="/dsbd" , "randi ka 
     }
   };
 
+  console.log(locationPath !== "/dashboard" && locationPath !=="/dsbd"  , "sdkfdskf")
+
   const verifyOtp = async () => {
     setMessage('Verifying...'); 
     
     try {
       setLoading(true);
-      if (locationPath !== "/dashboard" && locationPath!=="/dsbd") {
+      if (locationPath !== "/dashboard" && locationPath !=="/dsbd") {
         if (!otp) return setMessage('⚠️ Enter OTP');
         const verifyRes = await verifyEmailOTP(email, otp);
 
@@ -98,14 +101,12 @@ console.log(locationPath !== "/dashboard" && locationPath!=="/dsbd" , "randi ka 
           setLoading(false);
           return;
         }
-        
 
         setUserId(verifiedUserId);
         localStorage.setItem("token", verifyRes.data.token);
 
         setOtpVerified(true);
         setMessage('OTP verified and customer ready!');
-
          const customerRes = await fetch(`${API_BASE}/create-customer`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -118,7 +119,7 @@ console.log(locationPath !== "/dashboard" && locationPath!=="/dsbd" , "randi ka 
         }
         
         const customerData = await customerRes.json();
-        console.log("customer data:", customerData);
+    
 
         if (customerData.error) {
           setMessage(` Customer error: ${customerData.error}`);
@@ -151,7 +152,7 @@ console.log(locationPath !== "/dashboard" && locationPath!=="/dsbd" , "randi ka 
         }
         
         const customerData = await customerRes.json();
-        console.log("customer data:", customerData);
+    
 
         if (customerData.error) {
           setMessage(` Customer error: ${customerData.error}`);
@@ -177,6 +178,7 @@ console.log(locationPath !== "/dashboard" && locationPath!=="/dsbd" , "randi ka 
     } finally {
       setLoading(false);
     }
+
   };
 
   const handleEditEmail = () => {
@@ -245,8 +247,8 @@ console.log(locationPath !== "/dashboard" && locationPath!=="/dsbd" , "randi ka 
 
       {/* Send OTP button */}
       {!otpSent && (
-        <button onClick={locationPath === "/dashboard" || locationPath === "/dsbd" ? verifyOtp : sendOtp} className={styles.button} disabled={loading || !email || !contact || otpVerified ||userVerified}>
-          {loading ? 'Sending...' : locationPath === "/dashboard" || locationPath === "/dsbd"? "Verify Customer" : "Send Otp"}
+        <button onClick={locationPath === "/dashboard" || locationPath==="/dsbd" ? verifyOtp : sendOtp} className={styles.button} disabled={loading || !email || !contact || otpVerified ||userVerified}>
+          {loading ? 'Sending...' : locationPath === "/dashboard" || locationPath==="/dsbd" ? "Verify Customer" : "Send Otp"}
         </button>
       )}
 
