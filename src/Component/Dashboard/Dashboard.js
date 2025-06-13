@@ -43,6 +43,7 @@ function Dashboard() {
   const [userId, setUserId] = useState(userIdFromToken);
 
   const [agentId, setagentId] = useState()
+  const [subscriptionId, setsubscriptionId] = useState()
   const location = useLocation();
 
   const locationPath = location.pathname
@@ -101,7 +102,6 @@ function Dashboard() {
   const [open, setOpen] = useState(false);
 
   const [countryCode, setCountryCode] = useState('');
-  console.log("cccc", countryCode)
   const [ipData, setIpData] = useState({});
 
   useEffect(() => {
@@ -391,9 +391,9 @@ function Dashboard() {
   };
 
   const handleUpgradeClick = (agent) => {
-
-    console.log({ agent })
-    setagentId(agent);
+    // console.log("upBTN", agent)
+    setagentId(agent?.agent_id);
+    setsubscriptionId(agent?.subscriptionId)
     // Then open the modal
     setOpen(true);
   };
@@ -411,13 +411,13 @@ function Dashboard() {
     localStorage.removeItem("agents");
     localStorage.clear();
     sessionStorage.clear();
-      window.location.replace('/signup');
+    window.location.replace('/signup');
   };
 
-useEffect(() => {
+  useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-          window.location.replace('/signup'); 
+      window.location.replace('/signup');
     }
   }, []);
   useEffect(() => {
@@ -731,7 +731,7 @@ useEffect(() => {
                       <div
                         className={styles.OptionItem}
                         // onClick={() => setagentId(agent.agent_id)}
-                        onClick={() => handleUpgradeClick(agent.agent_id)}
+                        onClick={() => handleUpgradeClick(agent)}
                       >
                         Upgrade
                       </div>
@@ -1087,9 +1087,9 @@ useEffect(() => {
 
       <Modal isOpen={open} onClose={() => setOpen(false)}>
         {countryCode === 'in' ? (
-          <Plan agentID={agentId} locationPath={locationPath} />
+          <Plan agentID={agentId} subscriptionID={subscriptionId} locationPath={locationPath} />
         ) : (
-          <Plans agentID={agentId} locationPath={locationPath} />
+          <Plans agentID={agentId} subscriptionID={subscriptionId} locationPath={locationPath} />
         )}
       </Modal>
 

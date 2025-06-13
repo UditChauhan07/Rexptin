@@ -6,7 +6,7 @@ import axios from 'axios';
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
-const Plan = ({ agentID, locationPath }) => {
+const Plan = ({ agentID, locationPath,subscriptionID }) => {
   // console.log("plannnagent",agentID)
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -197,7 +197,7 @@ const Plan = ({ agentID, locationPath }) => {
           className={styles.btnTheme}
           onClick={() => {
             if (selected) {
-              navigate('/checkout', { state: { priceId: selected, agentId: agentID  , locationPath1: agentID ? locationPath : "/dsbd"  } });
+              navigate('/checkout', { state: { priceId: selected, agentId: agentID,subscriptionId:subscriptionID  , locationPath1: agentID ? locationPath : "/dsbd"  } });
             } else {
               alert('Please select a plan first');
             }
