@@ -14,12 +14,12 @@ function Checkout({
   userId,
   agentId,
   locationPath,
+  subscriptionId,
 }) {
   // Step state (1 or 2)
   const [step, setStep] = useState(1);
   // console.log("lstSTep", agentId);
   const navigate = useNavigate();
-
   const [companyName, setCompanyName] = useState("");
   const [gstNumber, setGstNumber] = useState("");
   const [addressLine1, setAddressLine1] = useState("");
@@ -157,29 +157,57 @@ function Checkout({
     }
 
     try {
-      const res = await fetch(`${API_BASE_URL}/create-subscription`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          planId: priceId,
-          customer_id: customerId,
-          billingDetails: {
-            name: billingName,
-            email,
-            companyName,
-            gstNumber,
-            address: {
-              line1: addressLine1,
-              line2: addressLine2,
-              city,
-              state,
-              postalCode,
-              country,
+      let res;
+      if (subscriptionId) {
+        res = await fetch(`${API_BASE_URL}/upgrade-customer`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            currentSubscriptionId:subscriptionId,
+            newPlanId: priceId,
+            customer_id: customerId,
+            billingDetails: {
+              name: billingName,
+              email,
+              companyName,
+              gstNumber,
+              address: {
+                line1: addressLine1,
+                line2: addressLine2,
+                city,
+                state,
+                postalCode,
+                country,
+              },
             },
-          },
-          userId,
-        }),
-      });
+            userId,
+          }),
+        });
+      } else {
+        res = await fetch(`${API_BASE_URL}/create-subscription`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            planId: priceId,
+            customer_id: customerId,
+            billingDetails: {
+              name: billingName,
+              email,
+              companyName,
+              gstNumber,
+              address: {
+                line1: addressLine1,
+                line2: addressLine2,
+                city,
+                state,
+                postalCode,
+                country,
+              },
+            },
+            userId,
+          }),
+        });
+      }
 
       if (!res.ok) throw new Error("Subscription creation failed");
 
