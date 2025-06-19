@@ -161,7 +161,7 @@ const Plan = ({agentID,locationPath}) => {
                       className={styles.priceOption}
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate("/rcheckout", {
+                        navigate("/checkout", {
                           state: { priceId: price.id },
                         });
                       }}
@@ -190,7 +190,7 @@ const Plan = ({agentID,locationPath}) => {
                   );
                   if (selectedProduct && selectedProduct.prices.length > 0) {
                     const priceId = selectedProduct.prices[0].id;
-                    navigate("/rcheckout", { state: { priceId ,agentId:agentID,locationPath1:locationPath } });
+                    navigate("/checkout", { state: { priceId ,agentId:agentID,locationPath1:locationPath } });
                   } else {
                     alert("No price available for selected plan");
                   }

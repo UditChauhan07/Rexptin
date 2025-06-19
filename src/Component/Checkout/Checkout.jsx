@@ -271,6 +271,9 @@ function Checkout({
         theme: {
           color: "#3399cc",
         },
+         methods: {
+        paypal: true  // This line enables PayPal
+    }
       };
 
       const rzp = new window.Razorpay(options);

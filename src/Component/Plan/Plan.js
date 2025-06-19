@@ -6,98 +6,58 @@ import axios from 'axios';
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
-const Plan = ({ agentID, locationPath,subscriptionID }) => {
-  // console.log("plannnagent",agentID)
+const Plan = ({ agentID, locationPath, subscriptionID }) => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selected, setSelected] = useState(null);
-  const [selectedAccordion, setSelectedAccordion] = useState(null); // Renamed `open` to `selectedAccordion`
-  const [billingInterval, setBillingInterval] = useState('monthly'); // Only used for India
-  const [countryCode, setCountryCode] = useState(''); // To store country code
+  const [selectedAccordion, setSelectedAccordion] = useState(null);
+  const [billingInterval, setBillingInterval] = useState('monthly');
+  
   const navigate = useNavigate();
 
-  // Fetch country code from IP-based API
-  useEffect(() => {
-    const fetchCountryCode = async () => {
-      try {
-        const res = await axios.get('https://ipwho.is/');
-        const data = res.data;
-        if (data && data.country_code) {
-          setCountryCode(data.country_code.toLowerCase()); // Get and store country code
-        }
-      } catch (err) {
-        console.error('Failed to fetch IP location:', err);
-      }
-    };
-    fetchCountryCode();
-  }, []);
-
-  // Fetch plans dynamically from API based on the country code
+  // Fetch plans dynamically from API
   useEffect(() => {
     const fetchPlans = async () => {
-      let apiUrl = `${API_BASE}/plans`; // Default API URL for India users
-
-      // If country is not India, fetch plans specifically for non-India (products)
-      if (countryCode !== 'in') {
-        apiUrl = `${API_BASE}/products`; // API endpoint for non-India-specific products
-      }
-      console.log("apiUrl", apiUrl)
-
+      const apiUrl = `${API_BASE}/products`; // API endpoint for non-India-specific products
+      
       try {
         const response = await fetch(apiUrl);
         const data = await response.json();
         console.log("Fetched data: ", data); // Check what the data looks like
 
-        // Handle response based on country
-        if (countryCode === 'in') {
-          // Handle India API response (plans)
-          const plans = data.items.map(plan => ({
-            id: plan.id,
-            name: plan.item.name,
-            description: plan.item.description,
-            price: (plan.item.amount / 100).toFixed(2), // Convert price to INR
-            currency: plan.item.currency,
-            minutes: plan.notes?.minutes,
-            period: plan.period,
-          }));
-          setPlans(plans);
-        } else {
-          // Handle Non-India API response (products)
+        // Check if products data is available
+        if (data && Array.isArray(data)) {
           const products = data.map(product => ({
             id: product.id,
             name: product.name,
             description: product.description,
-            price: (product.prices[0].unit_amount / 100).toFixed(2), // Only taking the first price (monthly)
+            price: (product.prices[0].unit_amount / 100).toFixed(2), // Assuming the price is in cents
             currency: product.prices[0].currency.toUpperCase(),
             minutes: product.metadata?.minutes,
           }));
           setPlans(products);
+        } else {
+          throw new Error('Invalid response format');
         }
-
         setLoading(false);
       } catch (err) {
-        console.error("Error fetching data:", err); // Log error if API request fails
+        console.error("Error fetching data:", err);
         setError('Failed to load plans.');
         setLoading(false);
       }
     };
 
-    if (countryCode) {
-      fetchPlans(); // Trigger fetching plans when countryCode is set
-    }
-  }, [countryCode]);
+    fetchPlans();
+  }, []);
 
-  // Accordion toggle function
   const toggleAccordion = (id) => {
-    setSelectedAccordion(selectedAccordion === id ? null : id); // Use the new state `selectedAccordion`
+    setSelectedAccordion(selectedAccordion === id ? null : id);
   };
 
-  // Filter plans by billingInterval (monthly or yearly) for India users only
-  const filteredPlans = plans.filter(plan => plan.period === billingInterval);
-
+  // Display all plans (no billing interval filtering since it's not in the response)
   const getMonthlyPrice = (plan) => {
-    return plan.price; // No division needed for non-India products, they are already monthly
+    return plan.price; // Assuming the price is already monthly
   };
 
   if (loading) return <p className={styles.status}><Loader /></p>;
@@ -115,27 +75,9 @@ const Plan = ({ agentID, locationPath,subscriptionID }) => {
         </div>
       </div>
 
-      {/* Only show tabs for Monthly / Yearly if country is India */}
-      {countryCode === 'in' && (
-        <div className={styles.tabs}>
-          <button
-            className={`${styles.tabButton} ${billingInterval === 'monthly' ? styles.activeTab : ''}`}
-            onClick={() => setBillingInterval('monthly')}
-          >
-            Monthly
-          </button>
-          <button
-            className={`${styles.tabButton} ${billingInterval === 'yearly' ? styles.activeTab : ''}`}
-            onClick={() => setBillingInterval('yearly')}
-          >
-            Yearly
-          </button>
-        </div>
-      )}
-
-      {/* Display Plans based on the country */}
+      {/* Display Plans */}
       <div className={styles.PlanDiv}>
-        {filteredPlans.map((plan) => (
+        {plans.map((plan) => (
           <div
             key={plan.id}
             className={`${styles.planBox} ${selected === plan.id ? styles.selected : ''}`}
@@ -156,15 +98,6 @@ const Plan = ({ agentID, locationPath,subscriptionID }) => {
                       <span className={styles.description}>{plan.description.trim()}</span>
                     </div>
                   </div>
-                  <div className={styles.planData}>
-                    <p>
-                      Price: <strong>{getMonthlyPrice(plan)} {plan.currency}</strong> /{' '}
-                      {countryCode === 'in' ? billingInterval : 'monthly'}
-                    </p>
-                    <p>
-                      <strong>{plan.minutes}</strong> minutes included
-                    </p>
-                  </div>
                 </div>
               </label>
             </div>
@@ -179,10 +112,10 @@ const Plan = ({ agentID, locationPath,subscriptionID }) => {
                   className={styles.priceOption}
                   onClick={(e) => {
                     e.stopPropagation();
-                    navigate('/checkout', { state: { priceId: plan.id  } });
+                    navigate('/checkout', { state: { priceId: plan.id } });
                   }}
                 >
-                  {getMonthlyPrice(plan)} {plan.currency} / {countryCode === 'in' ? billingInterval : 'monthly'}
+                  {getMonthlyPrice(plan)} {plan.currency} / monthly
                 </div>
               </div>
             </div>
@@ -191,13 +124,12 @@ const Plan = ({ agentID, locationPath,subscriptionID }) => {
       </div>
 
       {/* Continue button */}
-      <div
-        className={styles.bottomBtn}>
+      <div className={styles.bottomBtn}>
         <div
           className={styles.btnTheme}
           onClick={() => {
             if (selected) {
-              navigate('/checkout', { state: { priceId: selected, agentId: agentID,subscriptionId:subscriptionID  , locationPath1: agentID ? locationPath : "/dsbd"  } });
+              navigate('/checkout', { state: { priceId: selected, agentId: agentID, subscriptionId: subscriptionID, locationPath1: agentID ? locationPath : "/dsbd" } });
             } else {
               alert('Please select a plan first');
             }
@@ -207,8 +139,6 @@ const Plan = ({ agentID, locationPath,subscriptionID }) => {
           <p>Continue</p>
         </div>
       </div>
-
-
     </div>
   );
 };

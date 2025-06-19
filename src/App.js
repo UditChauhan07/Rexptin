@@ -61,13 +61,13 @@ function App() {
           {/* <Route path="/home" element={<Home />} /> */}
           <Route path="/ai-assistant" element={<SecureRoute><AiAssistant /></SecureRoute>} />
           <Route path="/rex-agent" element={<SecureRoute><RexAgent/></SecureRoute>} />
-          <Route path="/plans" element={<Plans/>} />
-          <Route path="/rplans" element={<Plan/>} />
+          <Route path="/plans" element={<Plan/>} />
+          {/* <Route path="/rplans" element={<Plan/>} /> */}
           <Route path="/pplans" element={<PayPalPlans/>} />
 
           
-          <Route path="/checkout" element={<SubscriptionFlow />} />
-          <Route path="/rcheckout" element={<SubscriptionFlow_ />} />
+          <Route path="/checkout" element={<SubscriptionFlow_ />} />
+          {/* <Route path="/rcheckout" element={<SubscriptionFlow_ />} /> */}
           <Route path="/pcheckout" element={<PaypalCheckout />} />
 
 
