@@ -12,34 +12,34 @@ const Plan = ({ agentID, locationPath, subscriptionID }) => {
   const [error, setError] = useState('');
   const [selected, setSelected] = useState(null);
   const [selectedAccordion, setSelectedAccordion] = useState(null);
-  const [billingInterval, setBillingInterval] = useState('monthly');
-  
-  const navigate = useNavigate();
 
-  // Fetch plans dynamically from API
+  const navigate = useNavigate();
+console.log(plans)
+  // Fetch plans dynamically from the API (same for all countries)
   useEffect(() => {
     const fetchPlans = async () => {
-      const apiUrl = `${API_BASE}/products`; // API endpoint for non-India-specific products
-      
+      const apiUrl = `${API_BASE}/products`; // Fetch data from the same endpoint for all users
+      console.log("apiUrl", apiUrl);
+
       try {
         const response = await fetch(apiUrl);
         const data = await response.json();
         console.log("Fetched data: ", data); // Check what the data looks like
 
-        // Check if products data is available
-        if (data && Array.isArray(data)) {
-          const products = data.map(product => ({
-            id: product.id,
-            name: product.name,
-            description: product.description,
-            price: (product.prices[0].unit_amount / 100).toFixed(2), // Assuming the price is in cents
-            currency: product.prices[0].currency.toUpperCase(),
-            minutes: product.metadata?.minutes,
-          }));
-          setPlans(products);
-        } else {
-          throw new Error('Invalid response format');
-        }
+        // Handle API response (products)
+        const products = data.map(product => ({
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          price: (product.prices[0].unit_amount / 100).toFixed(2), // Price in the selected currency
+          currency: product.prices[0].currency.toUpperCase(),
+          minutes: product.metadata?.minutes,
+          period: product.prices[0].recurring?.interval ,
+          priceId : product.prices[0].id
+        }));
+        console.log({products})
+
+        setPlans(products);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -49,15 +49,11 @@ const Plan = ({ agentID, locationPath, subscriptionID }) => {
     };
 
     fetchPlans();
-  }, []);
+  }, []); // Fetch plans once on component mount
 
+  // Accordion toggle function
   const toggleAccordion = (id) => {
     setSelectedAccordion(selectedAccordion === id ? null : id);
-  };
-
-  // Display all plans (no billing interval filtering since it's not in the response)
-  const getMonthlyPrice = (plan) => {
-    return plan.price; // Assuming the price is already monthly
   };
 
   if (loading) return <p className={styles.status}><Loader /></p>;
@@ -98,6 +94,14 @@ const Plan = ({ agentID, locationPath, subscriptionID }) => {
                       <span className={styles.description}>{plan.description.trim()}</span>
                     </div>
                   </div>
+                  <div className={styles.planData}>
+                    <p>
+                      Price: <strong>{plan.price} {plan.currency}</strong> / {plan.period}
+                    </p>
+                    <p>
+                      <strong>{plan.minutes}</strong> minutes included
+                    </p>
+                  </div>
                 </div>
               </label>
             </div>
@@ -115,7 +119,7 @@ const Plan = ({ agentID, locationPath, subscriptionID }) => {
                     navigate('/checkout', { state: { priceId: plan.id } });
                   }}
                 >
-                  {getMonthlyPrice(plan)} {plan.currency} / monthly
+                  {plan.price} {plan.currency} / {plan.period}
                 </div>
               </div>
             </div>
@@ -129,7 +133,7 @@ const Plan = ({ agentID, locationPath, subscriptionID }) => {
           className={styles.btnTheme}
           onClick={() => {
             if (selected) {
-              navigate('/checkout', { state: { priceId: selected, agentId: agentID, subscriptionId: subscriptionID, locationPath1: agentID ? locationPath : "/dsbd" } });
+              navigate('/checkout', { state: { priceId: plans[0].priceId, agentId: agentID, subscriptionId: subscriptionID, locationPath1: agentID ? locationPath : "/dsbd" } });
             } else {
               alert('Please select a plan first');
             }

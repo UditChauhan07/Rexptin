@@ -20,7 +20,7 @@ export default function SubscriptionFlow() {
   const priceId = location.state?.priceId;
   const agentId = location.state?.agentId || null;
   const locationPath = location.state?.locationPath1 || null;
-
+console.log(priceId ,"price id")
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");

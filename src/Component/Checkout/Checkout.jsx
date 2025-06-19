@@ -17,6 +17,7 @@ function Checkout({
   subscriptionId,
 }) {
   // Step state (1 or 2)
+  console.log(priceId , "price id in ch")
   const [step, setStep] = useState(1);
   // console.log("lstSTep", agentId);
   const navigate = useNavigate();

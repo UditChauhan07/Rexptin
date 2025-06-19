@@ -9,6 +9,7 @@ export default function SubscriptionFlow() {
   const navigate = useNavigate();
 
   const priceId = location.state?.priceId;
+  console.log(location , "price")
   const agentId = location.state?.agentId || null;
   const locationPath = location.state?.locationPath1 || null;
   const subscriptionID = location?.state?.subscriptionId || null
