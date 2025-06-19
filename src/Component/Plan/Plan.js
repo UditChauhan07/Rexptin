@@ -12,9 +12,10 @@ const Plan = ({ agentID, locationPath, subscriptionID }) => {
   const [error, setError] = useState('');
   const [selected, setSelected] = useState(null);
   const [selectedAccordion, setSelectedAccordion] = useState(null);
-
+  const [priceId, setPriceId] = useState(null); // State to store the selected priceId
   const navigate = useNavigate();
-console.log(plans)
+  console.log(plans)
+
   // Fetch plans dynamically from the API (same for all countries)
   useEffect(() => {
     const fetchPlans = async () => {
@@ -34,8 +35,8 @@ console.log(plans)
           price: (product.prices[0].unit_amount / 100).toFixed(2), // Price in the selected currency
           currency: product.prices[0].currency.toUpperCase(),
           minutes: product.metadata?.minutes,
-          period: product.prices[0].recurring?.interval ,
-          priceId : product.prices[0].id
+          period: product.prices[0].recurring?.interval,
+          priceId: product.prices[0].id
         }));
         console.log({products})
 
@@ -85,7 +86,10 @@ console.log(plans)
                   name="plan"
                   value={plan.id}
                   checked={selected === plan.id}
-                  onChange={() => setSelected(plan.id)}
+                  onChange={() => {
+                    setSelected(plan.id);  // Set selected plan ID
+                    setPriceId(plan.priceId);  // Set the corresponding priceId
+                  }}
                 />
                 <div className={styles.planContent}>
                   <div className={styles.planTitle}>
@@ -117,6 +121,7 @@ console.log(plans)
                   onClick={(e) => {
                     e.stopPropagation();
                     navigate('/checkout', { state: { priceId: plan.id } });
+                    setPriceId(null);
                   }}
                 >
                   {plan.price} {plan.currency} / {plan.period}
@@ -132,8 +137,8 @@ console.log(plans)
         <div
           className={styles.btnTheme}
           onClick={() => {
-            if (selected) {
-              navigate('/checkout', { state: { priceId: plans[0].priceId, agentId: agentID, subscriptionId: subscriptionID, locationPath1: agentID ? locationPath : "/dsbd" } });
+            if (priceId) {
+              navigate('/checkout', { state: { priceId, agentId: agentID, subscriptionId: subscriptionID, locationPath1: agentID ? locationPath : "/dsbd" } });
             } else {
               alert('Please select a plan first');
             }
