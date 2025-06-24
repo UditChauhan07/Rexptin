@@ -6,6 +6,7 @@ import decodeToken from "../../lib/decodeToken";
 import { getUserAgentMergedDataForAgentUpdate } from "../../Store/apiStore";
 import { useAgentCreator } from "../../hooks/useAgentCreator";
 import Loader from "../Loader/Loader";
+import useCheckAgentCreationLimit from "../../hooks/useCheckAgentCreationLimit";
 
 const BusinessDetails = () => {
   const navigate = useNavigate();
@@ -35,11 +36,19 @@ const BusinessDetails = () => {
   const [businessNameError, setBusinessNameError] = useState("");
   const [businessSizeError, setBusinessSizeError] = useState("");
   const [businessTypeError, setBusinessTypeError] = useState("");
-
+  const [serviesTypeError, setServiesTypeError] = useState("");
+  const [errors, setErrors] = useState({});
   // Submission state trackers
   const [businessTypeSubmitted, setBusinessTypeSubmitted] = useState(false);
   const [businessNameSubmitted, setBusinessNameSubmitted] = useState(false);
   const [businessSizeSubmitted, setBusinessSizeSubmitted] = useState(false);
+  const [customBuisness, setcustomBuisness] = useState("");
+  const [prevBuisnessType, setprevBuisnessType] = useState("");
+  const { isLimitExceeded, CheckingUserLimit } = useCheckAgentCreationLimit(userId);
+
+ 
+
+  // console.log(customBuisness, "customBuisness")
   const location = useLocation();
   const agentDetails = location.state;
 
@@ -49,16 +58,11 @@ const BusinessDetails = () => {
       subtype: "Your Journey Begins Here",
       icon: "svg/Estate-icon.svg",
     },
-    // {
-    //   type: "  Landscaping Company",
-    //   subtype: "Your Journey Begins Here",
-    //   icon: "svg/Landscaping-icon.svg",
-    // },
-    // {
-    //   type: " Architect",
-    //   subtype: "Your Journey Begins Here",
-    //   icon: "svg/Architect-icon.svg",
-    // },
+    {
+      type: "Restaurant",
+      subtype: "Your Journey Begins Here",
+      icon: "svg/Landscaping-icon.svg",
+    },
     {
       type: "Interior Designer",
       subtype: "Your Journey Begins Here",
@@ -68,6 +72,11 @@ const BusinessDetails = () => {
       type: "Saloon",
       subtype: "Your Journey Begins Here",
       icon: "svg/Saloon-icon.svg",
+    },
+      {
+      type: "Landscaping Company",
+      subtype: "Your Journey Begins Here",
+      icon: "svg/Landscaping-icon.svg",
     },
     {
       type: "Dentist",
@@ -95,6 +104,11 @@ const BusinessDetails = () => {
       subtype: "Your Journey Begins Here",
       icon: "svg/Web-Design-Agency-icon.svg",
     },
+    {
+      type: "Other",
+      subtype: "Your Journey Begins Here",
+      icon: "svg/Web-Design-Agency-icon.svg",
+    }
   ];
   const businessSizeOptions = [
     "1 to 10",
@@ -115,8 +129,10 @@ const BusinessDetails = () => {
 
         if (businessDetails) {
           setBusinessType(businessDetails.businessType || "");
+          setprevBuisnessType(businessDetails.businessType || "");
           setBusinessName(businessDetails.businessName || "");
           setBusinessSize(businessDetails.businessSize || "");
+          setcustomBuisness(businessDetails.customBuisness || "");
         }
       }
     } catch (err) {
@@ -128,16 +144,16 @@ const BusinessDetails = () => {
   };
 
   const validateBusinessName = (value) => {
-    if (!value.trim()) return "Business name is required.";
+    if (!value?.trim()) return "Business name is required.";
     if (containsEmoji(value)) return "Emojis are not allowed in business name.";
     if (/[^a-zA-Z0-9\s.'-]/.test(value))
       return "Business name contains invalid characters.";
-    if (value.trim().length < 2)
+    if (value?.trim().length < 2)
       return "Business name must be at least 2 characters.";
     return "";
   };
   const validateBusinessSize = (value) => {
-    if (!value.trim()) return "Business size is required.";
+    if (!value?.trim()) return "Business size is required.";
     const allowedValues = [
       "1 to 10 employees",
       "10 to 50 employees",
@@ -147,12 +163,28 @@ const BusinessDetails = () => {
       "500 to 1000 employees",
       "1000+ employees"
     ];
-    if (!allowedValues.includes(value)) {
+    if (!allowedValues?.includes(value)) {
       return "Invalid business size selected.";
     }
     return "";
   };
+
+  const validateServices = (value) => {
+    if (businessType === "Other" && !value.trim()) {
+      return "Business type is required.";
+    }
+    return "";
+  };
   const handleBusinessNameChange = (e) => {
+    const val = e.target.value;
+    setBusinessName(val);
+    if (businessNameSubmitted) {
+      setBusinessNameError(validateBusinessName(val));
+    } else {
+      setBusinessNameError("");
+    }
+  };
+  const handleNameChange = (e) => {
     const val = e.target.value;
     setBusinessName(val);
     if (businessNameSubmitted) {
@@ -168,9 +200,16 @@ const BusinessDetails = () => {
 
   const handleBusinessTypeChange = (e) => {
     setBusinessType(e.target.value);
+    if (e.target.value !== "Other") {
+      setcustomBuisness(""); // Clear textbox if not "Other"
+    }
+    console.log("businessTypeSubmitted", businessTypeSubmitted);
     if (businessTypeSubmitted) {
       setBusinessTypeError("");
+    
     }
+
+
   };
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -188,6 +227,24 @@ const BusinessDetails = () => {
 
     // Validate all fields
     let hasError = false;
+
+    if(prevBuisnessType != businessType) {
+      sessionStorage.removeItem("selectedServices");
+      sessionStorage.removeItem("selectedCustomServices");
+        const raw = sessionStorage.getItem("businesServices");
+        let previous = {};
+        try {
+            previous = raw ? JSON.parse(raw) : {};
+        } catch (err) {
+            console.error("Failed to parse businesServices:", err);
+        }
+
+         const updatedBusinessServices = {
+            selectedService:[],
+            email:previous.email,
+        };
+       sessionStorage.setItem("businesServices", JSON.stringify(updatedBusinessServices));
+    }
 
     if (!businessType) {
       setBusinessTypeError("Please select a business type.");
@@ -211,33 +268,97 @@ const BusinessDetails = () => {
     } else {
       setBusinessSizeError("");
     }
-
+    const serviceError = validateServices(customBuisness);
+    if (serviceError) {
+      setErrors((prev) => ({ ...prev, customBuisness: serviceError }));
+      hasError = true;
+    } else {
+      setErrors((prev) => ({ ...prev, customBuisness: "" }));
+    }
     if (hasError) return;
-
+    let businessData;
     // No errors - proceed
-    const businessData = {
-      userId,
-      businessType,
-      businessName: businessName.trim(),
-      businessSize,
-    };
-
+    if (businessType === "Other" && customBuisness.trim()) {
+      businessData = {
+        userId,
+        businessType: "Other", 
+        customBuisness: customBuisness.trim(), 
+        businessName: businessName.trim(),
+        businessSize,
+      };
+      navigate("/about-business-next");
+    } else {
+      businessData = {
+        userId,
+        businessType,
+        businessName: businessName.trim(),
+        businessSize,
+      };
+      navigate("/business-services");
+    }
     sessionStorage.setItem("businessDetails", JSON.stringify(businessData));
-    navigate("/business-services");
+
   };
   const handleSaveEdit = (e) => {
     e.preventDefault();
+
+    if(prevBuisnessType != businessType) {
+      sessionStorage.removeItem("selectedServices");
+      sessionStorage.removeItem("selectedCustomServices");
+        const raw = sessionStorage.getItem("businesServices");
+        let previous = {};
+        try {
+            previous = raw ? JSON.parse(raw) : {};
+        } catch (err) {
+            console.error("Failed to parse businesServices:", err);
+        }
+
+         const updatedBusinessServices = {
+            selectedService:[],
+            email:previous.email,
+        };
+       sessionStorage.setItem("businesServices", JSON.stringify(updatedBusinessServices));
+    }
     const businessData = {
       userId,
       businessType,
       businessName: businessName.trim(),
+      customBuisness: customBuisness.trim(), 
       businessSize,
     };
-    sessionStorage.setItem("businessDetails", JSON.stringify(businessData));
-    console.log('edit hit')
-    handleCreateAgent();
+    // if (businessType === "Other" && !customBuisness.trim()) {
+    //   newErrors.customBuisness = "Service name is required for 'Other' type.";
+    // }
 
+    sessionStorage.setItem("businessDetails", JSON.stringify(businessData));
+ 
+    setTimeout(() => {
+    handleCreateAgent();}, 500);
+     if(prevBuisnessType != businessType) {
+          setShowPopup(true);
+          setPopupType('success');
+          setPopupMessage("Business type changed please select related business services again !");
+     }
   };
+
+  // useEffect(() => {
+  //   if (!CheckingUserLimit && isLimitExceeded && !EditingMode) {
+  //     setShowPopup(true);
+  //     setPopupType('failed');
+  //     setPopupMessage("Agent creation limit exceeded. Please upgrade your plan!");
+  //   }
+  // }, [CheckingUserLimit, isLimitExceeded]);
+
+  // if (CheckingUserLimit) return 
+  
+    const handleClosePopup = () => {
+      if (!CheckingUserLimit && isLimitExceeded && !EditingMode) {
+      navigate('/dashboard');
+      setShowPopup(false);
+      }else{
+        setShowPopup(false);
+      }
+    }
 
   return (
     <div className={styles.container}>
@@ -294,6 +415,31 @@ const BusinessDetails = () => {
       {businessTypeSubmitted && businessTypeError && (
         <p className={styles.inlineError}>{businessTypeError}</p>
       )}
+
+
+      {/* Conditional textbox for "Other" */}
+      {businessType === "Other" && (
+        <div className={styles.labReq}>
+          <div className={styles.inputGroup}>
+            <div className={styles.Dblock}>
+              <label>Business Type<span className={styles.requiredField}> *</span></label>
+              <input
+                type="text"
+                placeholder="Enter your service name"
+                value={customBuisness}
+                onChange={(e) => setcustomBuisness(e.target.value)}
+                className={businessNameError ? styles.inputError : ""}
+              />
+              {errors.customBuisness && (
+                <p className={styles.inlineError}>{errors.customBuisness}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+
+
 
       <div className={styles.labReq}>
         <div className={styles.inputGroup}>
@@ -366,31 +512,31 @@ const BusinessDetails = () => {
           <p className={styles.inlineError}>{businessSizeError}</p>
         )}
       </div>
-{stepEditingMode!='ON'?    
-      <div onClick={handleLoginClick}>
-        <div type="submit">
-          <div className={styles.btnTheme}>
-            <img src="svg/svg-theme.svg" alt="" />
-            <p>Continue</p>
+      {stepEditingMode != 'ON' ?
+        <div onClick={handleLoginClick}>
+          <div type="submit">
+            <div className={styles.btnTheme}>
+              <img src="svg/svg-theme.svg" alt="" />
+              <p>Continue</p>
+            </div>
           </div>
         </div>
-      </div>
-      :
-       <div onClick={handleSaveEdit}>
-        <div type="submit">
-          <div className={styles.btnTheme}>
-            <img src="svg/svg-theme.svg" alt="" />
-            <p>{Loading?<Loader size={20}/>:'Save Edits'}</p>
+        :
+        <div onClick={handleSaveEdit}>
+          <div type="submit">
+            <div className={styles.btnTheme}>
+              <img src="svg/svg-theme.svg" alt="" />
+              <p>{Loading ? <Loader size={20} /> : 'Save Edits'}</p>
+            </div>
           </div>
         </div>
-      </div>
-        }
-     
+      }
+
 
       {showPopup && (
         <PopUp
           type={popupType}
-          onClose={() => setShowPopup(false)}
+          onClose={() =>handleClosePopup()}
           message={popupMessage}
         />
       )}

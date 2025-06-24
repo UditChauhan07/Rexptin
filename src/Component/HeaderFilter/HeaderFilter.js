@@ -19,12 +19,11 @@ function HeaderFilter({
 }) {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-  const [showCalendar, setShowCalendar] = useState(false);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [open, setOpen] = useState(false);
-  const totalAgentView = localStorage.getItem("filterType")
-
+  const [allSentiment, setAllSentiment] = useState("")
+  const totalAgentView = localStorage.getItem("filterType");
   const today = new Date();
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(today.getDate() - 7);
@@ -44,28 +43,44 @@ function HeaderFilter({
     const selectedOption = options.find((opt) => opt.id === selectedId);
     setSelected(selectedOption);
     onFilter(selectedOption.label);
+
   };
   const handleBack = () => {
     navigate(-1);
   };
 
-  const handleChangeDate = (dates) => {
-    const [start, end] = dates;
-    setStartDate(start);
-    setEndDate(end);
-    if (start && end) {
-      onRangeChange({
-        startDate: formatDateWithoutTimezone(start),
-        endDate: formatDateWithoutTimezone(end),
-      });
-      setOpen(false);
-    }
-  };
-  const handleFilterChange = (newFilters) => {
-    onFilterChange(newFilters); // existing filter logic
-    setIsOpen(false); // close the OffCanvas
-  };
+ const handleChangeDate = (dates) => {
+  const [start, end] = dates;
+  setStartDate(start);
+  setEndDate(end);
+};
+const handleApplyFilter = () => {
+  if (startDate && endDate) {
+    onRangeChange({
+      startDate: formatDateWithoutTimezone(startDate),
+      endDate: formatDateWithoutTimezone(endDate),
+    });
+    setOpen(false); 
+  }
+};
 
+const handleClearFilter = () => {
+  setStartDate(null);
+  setEndDate(null);
+  onRangeChange({ startDate: null, endDate: null }); // Clear the filter
+  setOpen(false); // Close the calendar when clearing
+};
+
+  const handleFilterChange = (newFilters) => {
+    onFilterChange(newFilters);
+    setIsOpen(false);
+  };
+  const handleAll = () => {
+    const allOption = options.find((opt) => opt.label === "All" || opt.id === 0);
+    setAllSentiment("all")
+    setSelected(allOption); // this sets dropdown to "All"
+    onFilter("All"); // clear sentiment filter
+  }
   return (
     <div>
       <div className={styles.Forsticky}>
@@ -179,24 +194,31 @@ function HeaderFilter({
               </div>
 
               <div className={styles.DatePic}>
-                {open && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      zIndex: 100,
-                      left: "50px",
-                      top: "40px",
-                    }}
-                  >
-                    <DatePicker
-                      selectsRange
-                      startDate={startDate}
-                      endDate={endDate}
-                      onChange={handleChangeDate}
-                      inline
-                    />
-                  </div>
-                )}
+               {open && (
+    <div
+      style={{
+        position: "absolute",
+        zIndex: 100,
+        left: "50px",
+        top: "40px",
+      }}
+    >
+      <DatePicker
+        selectsRange
+        startDate={startDate}
+        endDate={endDate}
+        onChange={handleChangeDate}
+        inline
+        maxDate={new Date()}
+        // Do not close the calendar when date is selected
+        onClickOutside={() => {}}
+      />
+      <div className={styles.dateButtons}>
+        <button onClick={handleApplyFilter} className={styles.applyButton}>Apply Filter</button>
+        <button onClick={handleClearFilter} className={styles.clearButton}>Clear Filter</button>
+      </div>
+    </div>
+  )}
 
                 <svg
                   onClick={() => setOpen(!open)}
@@ -261,6 +283,7 @@ function HeaderFilter({
       >
         {/* Put any content you want inside offcanvas here */}
         <SideFilter
+          onSelectAll={handleAll}
           filters={filters}
           onFilterChange={handleFilterChange}
           isLeadTypeSummary={isCallSummary}

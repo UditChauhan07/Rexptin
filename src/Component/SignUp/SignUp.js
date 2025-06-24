@@ -77,7 +77,7 @@ const SignUp = () => {
   };
 
   const handleEmailChange = (e) => {
-    const val = e.target.value;
+    const val = e.target.value.toLowerCase().trim();
     setEmail(val);
     setEmailTouched(true);
 
@@ -116,8 +116,9 @@ const SignUp = () => {
         sessionStorage.clear();
         setPopupType("success");
         setShowPopup(true);
-        setPopupMessage("One time Password Verified successfully!");
+        setPopupMessage("One Time Password Verified successfully!");
         if (verifiedUser) {
+          localStorage.setItem("onboardComplete", "true");
           setUser({
             name: response?.data?.user?.name || "",
             profile:
@@ -125,7 +126,6 @@ const SignUp = () => {
               }` || "images/camera-icon.avif",
             subscriptionDetails: {},
           });
-          localStorage.setItem("onboardComplete", "true");
           navigate("/dashboard", { replace: true });
         } else {
           setUser({
@@ -135,13 +135,13 @@ const SignUp = () => {
               }` || "images/camera-icon.avif",
             subscriptionDetails: {},
           });
-            localStorage.setItem("onboardComplete", "false");
+          localStorage.setItem("onboardComplete", "false");
           navigate("/details", { replace: true });
         }
       } else {
         setPopupType("failed");
         setShowPopup(true);
-        setPopupMessage("Failed to verify One time Password. Please try again.");
+        setPopupMessage("Failed to verify One Time Password. Please try again.");
       }
     } catch (error) {
       setPopupType("failed");
@@ -170,15 +170,15 @@ const SignUp = () => {
         setVerifiedUser(response.data.verifiedStatus);
         setShowPopup(true);
         setPopupType("success");
-        setPopupMessage("One time Password sent successfully!");
+        setPopupMessage("One Time Password sent successfully!");
         setOtpSent(true);
-        const endTime = Date.now() + 120 * 1000; // 2 mins from now
+        const endTime = Date.now() + 120 * 1000; 
         setResendEndTime(endTime);
         setIsResendDisabled(true);
       } else {
         setShowPopup(true);
         setPopupType("failed");
-        setPopupMessage("Failed to send One time Password. Please try again.");
+        setPopupMessage("Failed to send One Time Password. Please try again.");
       }
     } catch (error) {
       console.log(error);
@@ -246,17 +246,31 @@ const SignUp = () => {
       setStep(5);
     }
   }, []);
+  useEffect(() => {
+    window.history.pushState(null, '', window.location.href);
+
+    const handlePopState = () => {
+
+      navigate('/', { replace: true });
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
 useEffect(() => {
-  const preventGoBack = () => {
-    window.history.pushState(null, "", window.location.href);
-  };
-  window.history.pushState(null, "", window.location.href);
-  window.addEventListener("popstate", preventGoBack);
-  return () => {
-    window.removeEventListener("popstate", preventGoBack);
-  };
+  const savedEmail = localStorage.getItem("userEmail");
+  if (savedEmail) {
+    setEmail(savedEmail);
+  }
 }, []);
 
+useEffect(() => {
+  localStorage.setItem("userEmail", email);
+}, [email]);
 
   useEffect(() => {
     if (otpSent && inputRefs.current[0]) {
@@ -334,7 +348,7 @@ useEffect(() => {
                         <Loader size={17} />
                       </>
                     ) : (
-                      "Send One time Password"
+                      "Send One Time Password"
                     )}
                   </p>
                 </div>
@@ -424,10 +438,11 @@ useEffect(() => {
                     }}
                   >
                     {isResendDisabled && resendTimer > 0
-                      ? `Resend One time Password in ${String(Math.floor(resendTimer / 60)).padStart(2, "0")}:${String(resendTimer % 60).padStart(2, "0")}`
-                      : "Resend One time Password"}
+                      ? `Resend One Time Password in ${String(Math.floor(resendTimer / 60)).padStart(2, "0")}:${String(resendTimer % 60).padStart(2, "0")}`
+                      : "Resend One Time Password"}
                   </button>
                 </div>
+                
 
 
                 <div className={styles.Btn} onClick={handleLoginClick}>

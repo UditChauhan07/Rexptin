@@ -19,16 +19,18 @@ const roles = [
     //     icon: 'svg/technical-receptionist.svg',
     // },
 ];
-const Step4 = forwardRef(({ onNext, onBack, onValidationError, loading, setLoading }, ref) => {
+const Step4 = forwardRef(({ onNext, onBack, onValidationError, loading, setLoading, detectRoleTypeChange }, ref) => {
     const [selectedRole, setSelectedRole] = useState('');
-    useEffect(()=>{
+    useEffect(() => {
         const updationMode = localStorage.getItem("UpdationMode") === "ON";
         const storedAgentRole = localStorage.getItem('agentRole');
 
-            if(updationMode){
-                setSelectedRole(storedAgentRole)
-            }
-    },[])
+        if (updationMode) {
+            setSelectedRole(storedAgentRole)
+        } else {
+            setSelectedRole(storedAgentRole)
+        }
+    }, [])
 
     useEffect(() => {
         sessionStorage.setItem('agentRole', selectedRole)
@@ -48,7 +50,7 @@ const Step4 = forwardRef(({ onNext, onBack, onValidationError, loading, setLoadi
     }));
     return (
         <>
-              <div className={`${styles.container} ${loading ? styles.blocked : ''}`}>
+            <div className={`${styles.container} ${loading ? styles.blocked : ''}`}>
                 {
 
                     roles.map((role, index) => (
@@ -69,7 +71,10 @@ const Step4 = forwardRef(({ onNext, onBack, onValidationError, loading, setLoadi
                                 name="receptionist"
                                 value={role.title}
                                 checked={selectedRole === role.title}
-                                onChange={() => setSelectedRole(role.title)}
+                                onChange={() => {
+                                    setSelectedRole(role.title)
+                                    detectRoleTypeChange(role.title);
+                                }}
                                 className={styles.radio}
                             />
                             <span className={styles.customRadio}></span>

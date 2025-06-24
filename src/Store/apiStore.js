@@ -12,6 +12,7 @@ const api = axios.create({
     Authorization: `Bearer ${token}`,
   },
 });
+const userId = sessionStorage.getItem("userId");
 
 // ========== Auth APIs ==========
 
@@ -36,7 +37,6 @@ export const getRetellVoices = async () => {
 };
 
 export const createAgent = async (data) => {
-  console.log(token)
   const res = await api.post('/agent/createAgent', data, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -81,7 +81,6 @@ export const SendScriptToDeveloper = async (data) => {
 }
 export const listAgents = async () => {
   const res = await api.get(`${API_BASE_URL}/agent/listAgents`, {
-
   });
   return res.data;
 }
@@ -101,7 +100,7 @@ export const updateAgent = async (agentId, updateData) => {
   return res.data;
 };
 export const updateAgentWidgetDomain = async (id, url) => {
-  
+
   const data = { url: url }
   const res = await axios.put(`${API_BASE_URL}/agent/updateAgentWidgetDomain/${id}`, data);
   return res.data;
@@ -132,21 +131,21 @@ export const deleteAgent = async (agentId) => {
 export const validateEmail = async (email) => {
   try {
     const res = await api.get(`/validate-email?email=${email}`);
-    return res.data; 
+    return res.data;
   } catch (error) {
     console.error("Error validating email:", error);
-    return { valid: false, reason: 'Error validating email' };  
+    return { valid: false, reason: 'Error validating email' };
   }
 };
 
 
-export const getUserAgentMergedDataForAgentUpdate = async (agentId,businessId) => {
+export const getUserAgentMergedDataForAgentUpdate = async (agentId, businessId) => {
   try {
     const res = await api.get(`/agent/getUserAgentMergedDataForAgentUpdate/${agentId}?businessId=${businessId}`);
-    return res.data; 
+    return res.data;
   } catch (error) {
     console.error("Error validating email:", error);
-    return { valid: false, reason: 'Error validating email' };  
+    return { valid: false, reason: 'Error validating email' };
   }
 };
 
@@ -154,7 +153,7 @@ export const getAllAgentCalls = async (userId) => {
   try {
     const res = await api.get(`/agent/user/${userId}/agent/calls`, {
       headers: {
-         Authorization: `Bearer ${process.env.REACT_APP_API_RETELL_API}`,
+        Authorization: `Bearer ${process.env.REACT_APP_API_RETELL_API}`,
       },
     });
     return res.data;
@@ -163,13 +162,13 @@ export const getAllAgentCalls = async (userId) => {
     throw new Error("Failed to fetch agent calls");
   }
 };
-export const fetchUserDetails=async(id)=>{
-  const userId=id
+export const fetchUserDetails = async (id) => {
+  const userId = id
   try {
-      const response=await axios.get(`${API_BASE_URL}/endusers/users/${userId}`)
-      return response
+    const response = await axios.get(`${API_BASE_URL}/endusers/users/${userId}`)
+    return response
   } catch (error) {
-     console.log(error)
+    console.log(error)
   }
 }
 
@@ -188,6 +187,94 @@ export const toggleAgentActivation = async (agentId, deactivate = true) => {
     throw new Error("Failed to update agent activation status");
   }
 };
+
+export const getUserDetails = async (userId) => {
+  try {
+    const response = await api.get(`/endusers/users/${userId}`);
+    console.log(response,"response")
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    throw new Error("Failed to fetch user details");
+  }
+};
+
+export const updateUserDetails = async (userId,updateData) => {
+  try {
+    const response = await api.put(`/endusers/users/${userId}`, updateData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user details:", error);
+    throw new Error("Failed to update user details");
+  }
+};
+
+
+export const getUserAgentLimitStatus = async (userId) => {
+  try {
+    const res = await api.get(`/endusers/user-agent-limit-status?userId=${userId}`,{
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error toggling agent activation:", error.response?.data || error.message);
+    throw new Error("Failed to update agent activation status");
+  }
+};
+
+export const updateLlm = async (llmId, payload) => {
+  try {
+    const response = await axios.patch(
+      `https://api.retellai.com/update-retell-llm/${llmId}`,
+      payload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.REACT_APP_API_RETELL_API}`
+        }
+      }
+    );
+  } catch (error) {
+    console.error(" Error updating LLM:", error.response?.data || error.message);
+    alert(`Failed to update LLM: ${JSON.stringify(error.response?.data || error.message)}`);
+  }
+};
+export const fetchLlmDetails = async (llm_id) => {
+  const data={llmId:llm_id}
+  try {
+    const response = await axios.post(`${API_BASE_URL}/agent/getLlmDetails`,data,
+       {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+    return response
+
+  } catch (error) {
+    console.log(error)
+  }
+}
+export const addGeneralTools=async(llmId,transfers)=>{
+  console.log(transfers)
+try {
+  const response=await  axios.post(`${API_BASE_URL}/agent/addGeneralTools`,{
+      llmId,
+      transfers
+  },  {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      })
+} catch (error) {
+  
+}
+}
+
 
 
 export default api;
