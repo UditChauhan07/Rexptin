@@ -30,6 +30,7 @@ function CheckoutForm({
   agentId,
   locationPath,
   price,
+  subscriptionId,
 }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -440,31 +441,62 @@ function CheckoutForm({
     }
 
     try {
-      const res = await fetch(`${API_BASE_URL}/subscribe`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customerId,
-          priceId,
-          paymentMethodId: paymentMethod.id,
-          userId,
-          email,
-          promotionCode: promoCode,
-          companyName,
-          gstNumber,
-          billingAddress: {
-            line1: addressLine1,
-            line2: addressLine2,
-            city,
-            state,
-            postalCode,
-            country,
-          },
-          // promotionCode:"FREE99"
-        }),
-      });
-
-      const data = await res.json();
+      let data;
+      console.log("subscriptionId",subscriptionId)
+      if (subscriptionId) {
+        console.log("upgrade runn")
+        const res = await fetch(`${API_BASE_URL}/upgrade-customer-stripe`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            customerId,
+            priceId,
+            paymentMethodId: paymentMethod.id,
+            userId,
+            email,
+            promotionCode: promoCode,
+            companyName,
+            gstNumber,
+            billingAddress: {
+              line1: addressLine1,
+              line2: addressLine2,
+              city,
+              state,
+              postalCode,
+              country,
+            },
+            subscriptionId:subscriptionId
+            // promotionCode:"FREE99"
+          }),
+        });
+         data = await res.json();
+      } else {
+         console.log("create  runn")
+        const res = await fetch(`${API_BASE_URL}/subscribe`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            customerId,
+            priceId,
+            paymentMethodId: paymentMethod.id,
+            userId,
+            email,
+            promotionCode: promoCode,
+            companyName,
+            gstNumber,
+            billingAddress: {
+              line1: addressLine1,
+              line2: addressLine2,
+              city,
+              state,
+              postalCode,
+              country,
+            },
+            // promotionCode:"FREE99"
+          }),
+        });
+        data = await res.json();
+      }
 
       if (data.error) {
         setMessage(`❌ ${data.error}`);

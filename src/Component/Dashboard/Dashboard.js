@@ -672,13 +672,13 @@ function Dashboard() {
   };
 
   const handleUpgradeClick = (agent) => {
-    if (agent?.subscriptionId) {
-      alert("Coming Soon");
-    } else {
+    // if (agent?.subscriptionId) {
+    //   alert("Coming Soon");
+    // } else {
       setagentId(agent?.agent_id);
       setsubscriptionId(agent?.subscriptionId);
       setModelOpen(true);
-    }
+    // }
 
   };
 

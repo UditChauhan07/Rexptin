@@ -20,6 +20,7 @@ export default function SubscriptionFlow() {
   const priceId = location.state?.priceId;
   const agentId = location.state?.agentId || null;
   const price = location.state.price;
+  const subscriptionId = location.state.subscriptionId || null
   const locationPath = location.state?.locationPath1 || null;
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -292,6 +293,7 @@ export default function SubscriptionFlow() {
           disabled={!otpVerified} // Submit button disabled until OTP verified
           agentId={agentId}
           locationPath={locationPath}
+          subscriptionId={subscriptionId}
         />
       </div>
     </div>
