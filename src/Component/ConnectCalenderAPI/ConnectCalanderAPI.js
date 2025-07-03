@@ -6,7 +6,7 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import Typography from "@mui/material/Typography";
 import decodeToken from "../../lib/decodeToken";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import PopUp from "../Popup/Popup";
 
 const CalendarConnect = () => {
@@ -179,6 +179,9 @@ const CalendarConnect = () => {
       console.error("Error reading session storage:", err);
     }
   }, [location.state]);
+  const calInfo = () => {
+  window.open('/calInfo', '_blank'); 
+};
 
   return (
     <div>
@@ -187,7 +190,7 @@ const CalendarConnect = () => {
         <p className={styles.TopPara}>
           You can easily{" "}
           <strong>Connect your personal or business Calendar</strong> with your{" "}
-          <a href="#">Rexptin Agent</a> to receive calendar Meetings.
+      Rexptin Agent to receive calendar Meetings.
         </p>
 
         <div className={styles.supportSection}>
@@ -199,7 +202,7 @@ const CalendarConnect = () => {
 
         <div className={styles.toggleSection}>
           <label>
-            I have <a href="#">Cal.com Account</a> to connect
+            I have Cal.com Account to connect
           </label>
 
           <label className={styles.switch}>
@@ -219,6 +222,7 @@ const CalendarConnect = () => {
                 <label htmlFor="apiKey">Enter your API Key below:</label>
                 <a
                   href="https://app.cal.com/settings/developer/api-keys"
+                   target="_blank" rel="noopener noreferrer"
                   className={styles.link}
                 >
                   Where is my Key?
@@ -264,7 +268,7 @@ const CalendarConnect = () => {
 
         {!enabled && (
           <div className={styles.offSwitch}>
-            <a href="https://cal.com/?via=designersx&dub_id=kTPL5nvpvLqoLhE2">
+            <a href="https://cal.com/?via=designersx&dub_id=kTPL5nvpvLqoLhE2"  target="_blank" rel="noopener noreferrer">
               {" "}
               <div className={styles.recommendation}>
                 <img src="/images/CalCOm.png" />
@@ -312,7 +316,7 @@ const CalendarConnect = () => {
                 </AccordionDetails>
               </Accordion>
 
-              <button className={styles.guideButton}>
+              <button className={styles.guideButton} onClick={calInfo}>
                 <div>
                   <h6>Guide to Connect</h6>
 

@@ -135,9 +135,13 @@ const IntegrateAgent = () => {
 
     setValidatingDomain(true);
     try {
-      const response = await validateWebsite(newDomain.trim());
+      const domainWithProtocol = `https://${newDomain
+        .trim()
+        .replace(/^https?:\/\//, "")}`;
+      const response = await validateWebsite(domainWithProtocol);
+
       if (response.valid) {
-        setDomains((prev) => [...prev, newDomain.trim()]);
+        setDomains((prev) => [...prev, domainWithProtocol]);
         setNewDomain("");
         closeModal();
         setScriptGenerated(false); // ⬅️ Invalidate script
@@ -382,7 +386,10 @@ const IntegrateAgent = () => {
           </button>
         )}
 
-        <a href="#" className={styles.helpLink}>
+
+        <a href="/widget-guide"
+                  target="_blank"
+                  rel="noopener noreferrer" className={styles.helpLink}>
           Need Help integrate the AI widget?
         </a>
       </div>
@@ -399,11 +406,14 @@ const IntegrateAgent = () => {
 
         <input
           type="text"
-          placeholder="https://example.com"
-          value={newDomain}
-          onChange={(e) => setNewDomain(e.target.value)}
+          placeholder="example.com"
+          value={newDomain.replace(/^https?:\/\//, "")}
+          onChange={(e) =>
+            setNewDomain(e.target.value.replace(/^https?:\/\//, ""))
+          }
           className={styles.modalInput}
         />
+
         <button
           className={styles.modalSubmit}
           onClick={handleAddDomain}
