@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import styles from "./Dashboard.module.css";
 import Footer from "../AgentDetails/Footer/Footer";
 import Plan from "../Plan/Plan";
@@ -39,10 +39,14 @@ import Modal3 from "../Modal3/Modal3";
 import AnimatedButton from "../AnimatedButton/AnimatedButton";
 
 import axios from "axios";
+import { RefreshContext } from "../PreventPullToRefresh/PreventPullToRefresh";
 
 function Dashboard() {
   const { agents, totalCalls, hasFetched, setDashboardData, setHasFetched } =
     useDashboardStore();
+
+      const isRefreshing = useContext(RefreshContext);
+
   const navigate = useNavigate();
   const { user } = useUser();
   // Retell Web Client states
@@ -356,7 +360,7 @@ function Dashboard() {
     sessionStorage.setItem("SelectAgentId", agent?.agent_id);
     sessionStorage.setItem("SelectAgentBusinessId", agent?.businessId);
     navigate("/agent-detail", {
-      state: { agentId: agent?.agent_id, bussinesId: agent?.businessId},
+      state: { agentId: agent?.agent_id, bussinesId: agent?.businessId },
     });
   };
   useEffect(() => {
@@ -861,6 +865,7 @@ function Dashboard() {
     sessionStorage.setItem("naviateFrom", "dashboard");
     sessionStorage.setItem("SelectAgentBusinessId", ag?.businessId);
     sessionStorage.setItem("SelectAgentId", ag?.agent_id);
+    sessionStorage.setItem("plan", ag?.agentPlan);
     navigate("/edit-agent", {
       state: {
         agentId: ag?.agent_id,
@@ -1191,7 +1196,6 @@ function Dashboard() {
         (ag) => ag.agent_id === agentToDeactivate.agent_id
       );
 
-      console.log("agentData", agentData)
       const knowledgeBaseId = agentData?.knowledgeBaseId;
       const businessId = agentData?.businessId;
 
@@ -1409,7 +1413,6 @@ function Dashboard() {
     }
   };
   const handleUpgradeClick = (agent) => {
-    console.log("agent", agent)
     setagentId(agent?.agent_id);
     setsubscriptionId(agent?.subscriptionId);
     sessionStorage.setItem("updateBtn", "update")
@@ -1546,8 +1549,6 @@ function Dashboard() {
     }
     return number;
   }
-
-
   return (
     <div>
       <div className={styles.forSticky}>
@@ -2628,7 +2629,7 @@ function Dashboard() {
           isOpen={isAssignModalOpen}
           agentId={selectedAgentForAssign.agent_id}
           agentDetails={agentDetails}
-           onAgentDetailsPage={false}
+          onAgentDetailsPage={false}
           onClose={() => {
             setIsAssignModalOpen(false);
             setSelectedAgentForAssign(null);

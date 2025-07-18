@@ -171,10 +171,9 @@ const Step = () => {
     const services = selectedServices ? JSON.parse(selectedServices).businessType : [];
     const customServicesSelected = sessionStorage.getItem("businesServices");
     const checkCustomServicesSelected = customServicesSelected?.includes("Other")
+    const plan = sessionStorage.getItem("selectedPlan")
     const [shouldShowAboutBusinessNext, setShouldShowAboutBusinessNext] = useState(false);
     const [showThankuPage, setShowThankuPage] = useState(false)
-
-
     const [searchParams] = useSearchParams();
     const mode = searchParams.get("mode");
     const shouldShowThankYou = mode === "create" || mode === "update";
@@ -328,6 +327,8 @@ const Step = () => {
             status: true
         }));
     }
+    const languageAccToPlan =
+        ["Scaler", "Growth", "Corporate"].includes(plan) ? "multi" : sessionStorage.getItem("agentLanguageCode");
     const handleContinue = async () => {
         // if (step8ARef.current) {
         setIsContinueClicked(true);
@@ -368,8 +369,12 @@ const Step = () => {
                 aboutBusinessForm,
                 commaSeparatedServices,
                 agentNote,
-                timeZone
+                timeZone,
+                languageAccToPlan,
+                plan: plan
             });
+            console.log(filledPrompt)
+         
         const promptVariablesList = extractPromptVariables(rawPromptTemplate, {
             industryKey: business?.businessType == "Other" ? business?.customBuisness : business?.businessType,
             roleTitle: sessionStorage.getItem("agentRole"),
@@ -437,7 +442,6 @@ const Step = () => {
                     }
 
                 ],
-
                 states: [
                     {
                         name: "information_collection",
@@ -579,7 +583,7 @@ const Step = () => {
                     voice_id: sessionStorage.getItem("agentVoice") || "11labs-Adrian",
                     language: sessionStorage.getItem("agentLanguageCode") || "en-US",
                     agent_name: dynamicAgentName || sessionStorage.getItem("agentName"),
-                    language: "multi",
+                    language: languageAccToPlan,
                     post_call_analysis_model: "gpt-4o-mini",
                     responsiveness: 1,
                     enable_backchannel: true,
@@ -641,6 +645,7 @@ const Step = () => {
 
                         },
                     ],
+                    end_call_after_silence_ms: 30000,
                     normalize_for_speech: true,
                     webhook_url: `${API_BASE_URL}/agent/updateAgentCall_And_Mins_WebHook`,
                 };
