@@ -63,9 +63,9 @@ export default function CallSetting() {
   const dropdownOptions = agents.map(
     (agent) => `${agent.agentName}-${agent.agentCode}`
   );
-   const placeDetails = sessionStorage.getItem("placeDetailsExtract");
+  const placeDetails = sessionStorage.getItem("placeDetailsExtract");
   useEffect(() => {
- 
+
     if (placeDetails) {
       const parsedDetails = JSON.parse(placeDetails);
       if (parsedDetails && parsedDetails.phone && parsedDetails.country) {
@@ -125,6 +125,9 @@ export default function CallSetting() {
           dropdownOptions={dropdownOptions}
           selectedAgent={selectedAgent}
           onDropdownChange={setSelectedAgent}
+          // backgroundColor="#6524EB"
+          // dropdownBgColor="#6524EB"
+          // dropdownTextColor="#ffffffff"
         />
       </div>
 
@@ -223,9 +226,8 @@ export default function CallSetting() {
                   value={frequency}
                   className={styles.sliderRange}
                   style={{
-                    background: `linear-gradient(to right, #693bff ${
-                      frequency * 100
-                    }%, #fff ${frequency * 100}%)`,
+                    background: `linear-gradient(to right, #693bff ${frequency * 100
+                      }%, #fff ${frequency * 100}%)`,
                     cursor: "not-allowed",
                     pointerEvents: "none",
                   }}
