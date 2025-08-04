@@ -395,7 +395,7 @@ export const useAgentCreator = ({
         default_dynamic_variables: {
           customer_name: "John Doe",
           timeZone: "Asia/Kolkata",
-          business_Phone: businessPhone,
+          business_Phone: businessPhone||"",
           business_email: business.email,
           email: "",
         },
@@ -505,6 +505,7 @@ export const useAgentCreator = ({
               },
             ],
             webhook_url: `${API_BASE_URL}/agent/updateAgentCall_And_Mins_WebHook`,
+            // webhook_url: `https://5efd7d671038.ngrok-free.app/api/agent/updateAgentCall_And_Mins_WebHook`,
             normalize_for_speech: true,
           };
           const agent_id =
