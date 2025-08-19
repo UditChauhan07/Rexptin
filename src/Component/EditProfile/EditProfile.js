@@ -376,6 +376,21 @@ const EditProfile = () => {
   };
   const nevigate = useNavigate();
 
+  const connect = () => {
+    // const userId=localStorage.getItem("userId")
+    const url = new URL(`${API_BASE}/zapier/auth/hubspot`);
+    console.log(userId,"userId")
+    url.searchParams.set('state', userId); // your user id
+    window.location.href = url.toString();
+  };
+
+  const connectSquare=()=>{
+     const url = new URL(`${API_BASE}/zapier/auth/hubspot`);
+    console.log(userId,"userId")
+    url.searchParams.set('state', userId); // your user id
+    window.location.href = url.toString();
+
+  }
 
   const [paygEnabled, setPaygEnabled] = useState(localStorage.getItem("isPayg") || false);
   const PaygSubscriptionId = subscriptionDetails.invoices
@@ -1027,6 +1042,12 @@ const EditProfile = () => {
               <div className={styles.RefferalMain}>
               </div>
               <br></br>
+             <div style={{display:"flex",gap:'5px'}}>
+               {/* <a href="https://yourapi.com/auth/hubspot"> */}
+  <button onClick={connect}>Connect HubSpot</button>
+   <button onClick={connectSquare}>Connect Square</button>
+{/* </a> */}
+             </div>
               <div className={styles.mySubscription}>
                 <MySubscription agents={subscriptionDetails?.agents || []} />
               </div>
