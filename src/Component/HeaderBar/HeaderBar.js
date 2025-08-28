@@ -5,11 +5,16 @@ const HeaderBar = ({ title, subtitle, dropdownOptions = [], onDropdownChange,sel
   const navigate = useNavigate();
   const handleBack = () => {
     const currentPath = window.location.pathname;
-
+let assignNum = sessionStorage.getItem("assignNum")
     if (currentPath.endsWith("/plan") || currentPath === "/plan") {
       navigate("/dashboard");
     }else if (currentPath.endsWith("/plans") || currentPath === "/plans") {
       navigate("/steps");} 
+      else if(assignNum){
+        sessionStorage.removeItem("assignNum")
+        navigate('/dashboard')
+
+      }
     else {
       navigate(-1);
     }

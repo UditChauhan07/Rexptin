@@ -2314,7 +2314,9 @@ function Dashboard() {
 
       if (response.ok) {
         const responseData = await response.json();
+        
         if (responseData.checkoutUrl) {
+          sessionStorage.setItem("assignNum" , true)
           window.location.href = responseData.checkoutUrl;
         }
 
